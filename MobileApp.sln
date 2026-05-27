@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileApp", "MobileApp\MobileApp.csproj", "{23DA025F-7594-4BCA-B1A4-E68308C5694C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{23DA025F-7594-4BCA-B1A4-E68308C5694C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23DA025F-7594-4BCA-B1A4-E68308C5694C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23DA025F-7594-4BCA-B1A4-E68308C5694C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23DA025F-7594-4BCA-B1A4-E68308C5694C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

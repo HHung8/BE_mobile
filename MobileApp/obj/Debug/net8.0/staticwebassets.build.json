@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "6ZF1GzR9OqE8utXhsw0IRGlrj08fdVA6PPqdPanTGDU=",
+  "Source": "MobileApp",
+  "BasePath": "_content/MobileApp",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
