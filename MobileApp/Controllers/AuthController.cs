@@ -10,12 +10,12 @@ namespace MobileApp.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-
+    
     public AuthController(IAuthService authService)
     {
         _authService = authService;
     }
-    // Post api/auth/register
+    // Post api/Auth/register
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
@@ -32,7 +32,7 @@ public class AuthController : ControllerBase
         if(!success) return BadRequest(new {message});
         return Ok(data);
     }
-
+    // Post api/Auth/login
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
@@ -45,7 +45,7 @@ public class AuthController : ControllerBase
         if (!success) return Unauthorized(new { message });
         return Ok(data);
     }
-
+    // api/Auth/refresh
     [HttpPost("refresh")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
@@ -55,7 +55,7 @@ public class AuthController : ControllerBase
         if(!success) return Unauthorized(new { message });
         return Ok(data);
     }
-
+    // api/Auth/logout
     [HttpPost("logout")]
     public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
     {
