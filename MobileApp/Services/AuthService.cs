@@ -31,17 +31,19 @@ public class AuthService : IAuthService
         {
             if (existingUser.Email == request.Email)
                 return (false, "Email đã được sử dụng", null);
+            else                                                    // ✅ Sửa: thêm else
                 return (false, "Username đã được sử dụng", null);
         }
-        
         // 2. Mã hoá mật khẩu băng Bcrypt ()
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        
         // 3. Lưu user vào database
         var newUser = await conn.QueryFirstAsync<User>(
             @"INSERT INTO users (username, email, password_hash)
               VALUES (@Username, @Email, @PasswordHash)
-              RETURNING *",
+              RETURNING id, username, email,
+                        password_hash AS PasswordHash,
+                        created_at AS CreatedAt,
+                        updated_at AS UpdatedAt",   // ✅ Sửa: thêm AS thay vì RETURNING *
             new { request.Username, request.Email, PasswordHash = passwordHash }
         );
         return await CreateAuthResponseAsync(newUser, conn);
@@ -52,7 +54,12 @@ public class AuthService : IAuthService
     {
         using var conn = _db.CreateConnection();
         var user = await conn.QueryFirstOrDefaultAsync<User>(
-            "SELECT * FROM users WHERE email = @Email",
+            @"SELECT id, username, email, 
+                    password_hash AS PasswordHash,
+                    created_at AS CreatedAt,
+                    updated_at AS UpdatedAt
+                FROM users WHERE email = @Email
+            ",
             new { request.Email }
         );
         if (user == null) return (false, "Email hoặc mật khẩu không đúng", null);
@@ -62,19 +69,18 @@ public class AuthService : IAuthService
         // 3. Tạo token và trả về
         return await CreateAuthResponseAsync(user, conn);
     }
-
-    public Task<(bool Success, string Message, AuthResponse? Data)> RefreshTokenAsync(RefreshToken refreshToken)
-    {
-        throw new NotImplementedException();
-    }
-
+    
     // Làm mới token khi token hết hạn
     public async Task<(bool Success, string Message, AuthResponse? Data)> RefreshTokenAsync(string refreshToken)
     {
         using var conn = _db.CreateConnection();
         // 1. Tìm refresh token trong database
         var storedToken = await conn.QueryFirstOrDefaultAsync<RefreshToken>(
-            "SELECT * FROM refresh_tokens WHERE token = @Token",
+            @"SELECT id, user_id AS UserId, token,
+                     expires_at AS ExpiresAt,
+                     created_at AS CreatedAt,
+                     is_revoked AS IsRevoked
+              FROM refresh_tokens WHERE token = @Token",   // ✅ Sửa: thêm AS
             new { Token = refreshToken }
         );
         if (storedToken == null)
@@ -84,13 +90,17 @@ public class AuthService : IAuthService
         if (storedToken.ExpiresAt < DateTime.UtcNow)
             return (false, "Refresh token đã hết hạn", null);
         var user = await conn.QueryFirstOrDefaultAsync<User>(
-            "SELECT * FROM users WHERE id = @Id",
+            @"SELECT id, username, email,
+                     password_hash AS PasswordHash,
+                     created_at AS CreatedAt,
+                     updated_at AS UpdatedAt
+              FROM users WHERE id = @Id",
             new { Id = storedToken.UserId }
-            );
+        );
         if(user == null) return (false, "User not found", null);
         await conn.ExecuteAsync(
-            "UPDATE refresh_tokens SET is_revoked = TRUE WHERE id = @Id",
-            new { storedToken.Id }
+            "UPDATE refresh_tokens SET is_revoked = TRUE WHERE id = @id",
+            new { id = storedToken.Id }
         );
         return await  CreateAuthResponseAsync(user, conn);
     }
@@ -112,8 +122,10 @@ public class AuthService : IAuthService
     {
         var accessToken = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
+        
         var refreshExpirationDays = int.Parse(_config["JwtSettings:RefreshTokenExpirationDays"] ?? "7"); 
         var refreshExpiration = DateTime.UtcNow.AddDays(refreshExpirationDays);
+        
         // Save refreshToken in database
         await conn.ExecuteAsync(
             @"INSERT INTO refresh_tokens (user_id, token, expires_at)
@@ -127,9 +139,9 @@ public class AuthService : IAuthService
             ExpiresAt = DateTime.UtcNow.AddMinutes(int.Parse(_config["JwtSettings:AccessTokenExpirationMinutes"] ?? "60")),
             User = new UserDto
             {
+                Id = user.Id,
                 Email = user.Email,
                 Username = user.Username,
-                Id = user.Id,
             }
         };
         return (true, "Thành công", response);

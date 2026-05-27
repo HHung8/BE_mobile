@@ -57,12 +57,10 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("logout")]
-    [Authorize]
     public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
     {
         await _authService.RevokeRefreshTokenAsync(request.RefreshToken);
         return Ok(new { message = "Đăng xuất thành công" });
     }
-    
     
 }

@@ -3,7 +3,7 @@ namespace MobileApp.Models;
 // DATABASE MODELS
 public class User
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
@@ -13,8 +13,8 @@ public class User
 
 public class RefreshToken
 {
-    public int Id { get; set; }
-    public int UserId { get; set; }
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
     public string Token { get; set; } = string.Empty;
     public DateTime ExpiresAt { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -58,7 +58,7 @@ public class AuthResponse
 // UserDto: chỉ trả về thông tin cần thiết, KHÔNG trả về PasswordHash
 public class UserDto
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
 }
