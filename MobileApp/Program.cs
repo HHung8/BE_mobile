@@ -44,6 +44,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddSingleton<DatabaseConnection>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // 2. Cấu hình jwt authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");

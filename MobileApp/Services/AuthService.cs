@@ -10,12 +10,14 @@ public class AuthService : IAuthService
     private readonly DatabaseConnection _db;
     private readonly ITokenService _tokenService;
     private readonly IConfiguration _config;
-
-    public AuthService(DatabaseConnection db, ITokenService tokenService, IConfiguration config)
+    private readonly IEmailService _emailService;
+    
+    public AuthService(DatabaseConnection db, ITokenService tokenService, IConfiguration config, IEmailService emailService)
     {
         _db = db;
         _tokenService = tokenService;
         _config = config;
+        _emailService = emailService;
     }
     
     // Đăng ký
@@ -117,8 +119,7 @@ public class AuthService : IAuthService
     }
     
     // Tạo AuthResponse
-    private async Task<(bool Success, string Message, AuthResponse? Data)> CreateAuthResponseAsync(User user,
-        System.Data.IDbConnection conn)
+    private async Task<(bool Success, string Message, AuthResponse? Data)> CreateAuthResponseAsync(User user, System.Data.IDbConnection conn)
     {
         var accessToken = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
@@ -145,5 +146,55 @@ public class AuthService : IAuthService
             }
         };
         return (true, "Thành công", response);
+    }
+    
+    // Quên mật khẩu
+    public async Task<(bool Success, string Message)> ForgotPasswordAsync(string email)
+    {
+        using var conn = _db.CreateConnection();
+        var user = await conn.QueryFirstOrDefaultAsync<User>(
+            "SELECT * FROM users WHERE email = @Email",
+            new { Email = email }
+        );
+        if (user == null) return (false, "Email không tồn tại");
+        // Tạo OTP
+        var otp = new Random().Next(100000, 999999).ToString();
+        var expiresAt = DateTime.UtcNow.AddMinutes(10);
+        await conn.ExecuteAsync(
+            "DELETE FROM password_reset_otps WHERE email = @Email",
+            new { Email = email }
+        );
+        await conn.ExecuteAsync(
+            @"INSERT INTO password_reset_otps (email, otp, expires_at) 
+                  VALUES (@Email, @Otp, @Expires_at)",
+            new { Email = email, Otp = otp, Expires_at = expiresAt }
+        );
+        await _emailService.SendOtpEmailAsync(email, otp);
+        return (true, "Đã gửi mã OTP");
+    }
+    
+    // ResetPassword
+    public async Task<(bool Success, string Message)> ResetPasswordAsync(ResetPasswordRequest request)
+    {
+        using var conn = _db.CreateConnection();
+        // Check OTP
+        var otpRecord = await conn.QueryFirstOrDefaultAsync(
+            @"SELECT * FROM password_reset_otps 
+                  WHERE email = @Email AND otp = @Otp AND is_used = FALSE",
+            new { Email = request.Email, Otp = request.Otp }
+        );
+        if (otpRecord == null) return (false, "Mã OTP không đúng");
+        if (otpRecord.expires_at < DateTime.UtcNow) return (false, "Mã OTP đã hết hạn");
+        // Đổi mật 
+        var newHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        await conn.ExecuteAsync(
+            "UPDATE users SET password_hash = @Hash WHERE email = @Email",
+            new { Hash = newHash, Email = request.Email }
+        );
+        await conn.ExecuteAsync(
+            "UPDATE password_reset_otps SET is_used = TRUE WHERE email = @Email",
+            new { Email = request.Email }
+        );
+        return (true, "Đổi mật khẩu thành công");
     }
 }
