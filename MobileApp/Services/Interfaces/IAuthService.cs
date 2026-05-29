@@ -10,4 +10,5 @@ public interface IAuthService
     Task<bool> RevokeRefreshTokenAsync(string refreshToken);
     Task<(bool Success, string Message)> ForgotPasswordAsync(string email);
     Task<(bool Success, string Message)> ResetPasswordAsync(ResetPasswordRequest request);
+    Task<(bool Success, string Message)> VerifyOtpAsync(VerifyOtpRequest email);
 }

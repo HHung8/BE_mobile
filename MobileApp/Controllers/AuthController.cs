@@ -80,5 +80,13 @@ public class AuthController : ControllerBase
         if (!success) return BadRequest(new {message});
         return Ok(new {message});
     }
-    
+
+    [HttpPost("verify-otp")]
+    [AllowAnonymous]
+    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request)
+    {
+        var (success, message) = await _authService.VerifyOtpAsync(request);
+        if (!success) return BadRequest(new {message});
+        return Ok(message);
+    }
 }

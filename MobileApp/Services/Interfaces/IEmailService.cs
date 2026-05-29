@@ -1,3 +1,5 @@
+using MobileApp.Models;
+
 namespace MobileApp.Services.Interfaces;
 
 public interface IEmailService

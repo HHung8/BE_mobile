@@ -197,4 +197,19 @@ public class AuthService : IAuthService
         );
         return (true, "Đổi mật khẩu thành công");
     }
+
+    public async Task<(bool Success, string Message)> VerifyOtpAsync(VerifyOtpRequest request)
+    {
+        using var conn = _db.CreateConnection();
+        var otpRecord = await conn.QueryFirstOrDefaultAsync(
+            @"SELECT * FROM password_reset_otps 
+                  WHERE email = @Email AND otp = @Otp AND is_used = FALSE",
+            new { Email = request.Email, Otp = request.Otp }
+        );
+        if (otpRecord == null) return (false, "Mã OTP không đúng");
+        if (otpRecord.expires_at < DateTime.UtcNow) return (false, "Mã OTP đã hết hạn");
+        return (true, "Mã OTP hợp lệ");
+    }
+    
+    
 }
