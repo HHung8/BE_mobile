@@ -45,6 +45,7 @@ builder.Services.AddSingleton<DatabaseConnection>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IPropertyService, PropertyService>();
 
 // 2. Cấu hình jwt authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -69,6 +70,7 @@ builder.Services.AddAuthentication(options =>
             ClockSkew = TimeSpan.Zero
         }; 
 });
+Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 builder.Services.AddAuthorization();
 var app = builder.Build();
 

@@ -16,8 +16,8 @@ public class EmailService : IEmailService
     {
         var email = new MimeMessage();
         email.From.Add(new MailboxAddress(
-            _config["EmailSettings:SenderName"],
-            _config["EmailSettings:SenderEmail"]
+            _config["EmailSettings:SenderName"]!,
+            _config["EmailSettings:SenderEmail"]!
         ));
         email.To.Add(MailboxAddress.Parse(toEmail));
         email.Subject = "Mã xác nhận đặt lại mật khẩu";
@@ -34,13 +34,13 @@ public class EmailService : IEmailService
 
         using var smtp = new SmtpClient();
         await smtp.ConnectAsync(
-            _config["EmailSettings:SmtpHost"],
+            _config["EmailSettings:SmtpHost"]!,
             int.Parse(_config["EmailSettings:SmtpPort"]!),
             MailKit.Security.SecureSocketOptions.StartTls
         );
         await smtp.AuthenticateAsync(
-            _config["EmailSettings:SenderEmail"],
-            _config["EmailSettings:AppPassword"]
+            _config["EmailSettings:SenderEmail"]!,
+            _config["EmailSettings:AppPassword"]!
         );
         await smtp.SendAsync(email);
         await smtp.DisconnectAsync(true);
