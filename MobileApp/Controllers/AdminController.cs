@@ -7,7 +7,7 @@ namespace MobileApp.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-// [Authorize]
+[Authorize]
 public class AdminController : ControllerBase
 {
     private readonly IPropertyService _propertyService;

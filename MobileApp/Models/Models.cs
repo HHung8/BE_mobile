@@ -97,6 +97,15 @@ public class UpdatePropertyRequest : CreatePropertyRequest
     public bool IsSold { get; set; } = false;
 }
 
+public class SavedProperty
+{
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
+    public Guid PropertyId { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public Property? Property { get; set; }
+}
+
 // ========================
 // RESPONSE MODELS (Server trả về)
 // ========================

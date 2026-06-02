@@ -17,11 +17,12 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() {Title = "Auth API", Version = "v1"});
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
-        Description = "Nhập token theo dạng: Bearer {token}",
         Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Description = "JWT Authorization header using the Bearer scheme."
     });
     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
@@ -46,6 +47,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPropertyService, PropertyService>();
+builder.Services.AddScoped<ISavedPropertyService, SavedPropertyService>();
 
 // 2. Cấu hình jwt authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -68,8 +70,21 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = jwtSettings["Audience"],
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
-        }; 
-});
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"JWT ERROR: {context.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnMessageReceived = context =>
+            {
+                Console.WriteLine($"AUTH HEADER: {context.Request.Headers.Authorization}");
+                return Task.CompletedTask;
+            }
+        };
+    });
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 builder.Services.AddAuthorization();
 var app = builder.Build();
