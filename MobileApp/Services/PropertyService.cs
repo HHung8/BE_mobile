@@ -97,6 +97,19 @@ public class PropertyService : IPropertyService
                 ORDER BY created_at DESC";
        return (await conn.QueryAsync<Property>(sql)).ToList();
     }
+
+    public async Task<List<Property>> GetRecommendAsync()
+    {
+        using var conn = _db.CreateConnection();
+        var sql = @"SELECT id, title, description, price, type, bedrooms,
+                            bathrooms, area_sqft AS AreaSqft, address, city, latitude, longitude,
+                            images, is_featured AS IsFeatured,
+                            is_sold AS IsSold, created_at AS CreatedAt
+                    FROM properties
+                    WHERE is_featured = FALSE AND is_sold = FALSE
+                    ORDER BY created_at DESC";
+        return (await conn.QueryAsync<Property>(sql)).ToList();
+    }
     
     public async Task<Property?> GetByIdAsync(Guid id)
     {

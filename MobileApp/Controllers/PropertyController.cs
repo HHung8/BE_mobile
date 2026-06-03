@@ -28,6 +28,13 @@ public class PropertyController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("recommended")]
+    public async Task<IActionResult> GetRecommend()
+    {
+        var result = await _propertyService.GetRecommendAsync();
+        return Ok(result);
+    }
+    
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {

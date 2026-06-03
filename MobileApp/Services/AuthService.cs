@@ -44,8 +44,9 @@ public class AuthService : IAuthService
               VALUES (@Username, @Email, @PasswordHash)
               RETURNING id, username, email,
                         password_hash AS PasswordHash,
+                        is_admin AS IsAdmin,
                         created_at AS CreatedAt,
-                        updated_at AS UpdatedAt",   // ✅ Sửa: thêm AS thay vì RETURNING *
+                        updated_at AS UpdatedAt",   
             new { request.Username, request.Email, PasswordHash = passwordHash }
         );
         return await CreateAuthResponseAsync(newUser, conn);
@@ -58,6 +59,7 @@ public class AuthService : IAuthService
         var user = await conn.QueryFirstOrDefaultAsync<User>(
             @"SELECT id, username, email, 
                     password_hash AS PasswordHash,
+                    is_admin AS IsAdmin,
                     created_at AS CreatedAt,
                     updated_at AS UpdatedAt
                 FROM users WHERE email = @Email
@@ -94,6 +96,7 @@ public class AuthService : IAuthService
         var user = await conn.QueryFirstOrDefaultAsync<User>(
             @"SELECT id, username, email,
                      password_hash AS PasswordHash,
+                     is_admin AS IsAdmin,
                      created_at AS CreatedAt,
                      updated_at AS UpdatedAt
               FROM users WHERE id = @Id",
@@ -143,6 +146,7 @@ public class AuthService : IAuthService
                 Id = user.Id,
                 Email = user.Email,
                 Username = user.Username,
+                IsAdmin = user.IsAdmin, 
             }
         };
         return (true, "Thành công", response);
