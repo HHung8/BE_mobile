@@ -53,8 +53,14 @@ public class SavedController : ControllerBase
     [HttpGet("{propertyId}")]
     public async Task<IActionResult> CheckSaved(Guid propertyId)
     {
-        var isSaved = await _savedService.IsSavedAsync(GetUserId(), propertyId);
-        return Ok(new {isSaved});
+        var userId = GetUserId();
+        Console.WriteLine($"=== CheckSaved ===");
+        Console.WriteLine($"userId: {userId}");
+        Console.WriteLine($"propertyId: {propertyId}");
+    
+        var isSaved = await _savedService.IsSavedAsync(userId, propertyId);
+        Console.WriteLine($"isSaved: {isSaved}");
+        return Ok(new { isSaved });
     }
     
 }

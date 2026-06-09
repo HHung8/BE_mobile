@@ -73,10 +73,10 @@ public class SavedPropertyService : ISavedPropertyService
     public async Task<bool> IsSavedAsync(Guid userId, Guid propertyId)
     {
         using var conn = _db.CreateConnection();
-        var result = await conn.QueryFirstOrDefaultAsync(
-            "SELECT id FROM saved_properties WHERE user_id = @UserId AND property_id = @PropertyId",
-            new { UserId = userId, PropertyId = propertyId }
+        var count = await conn.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM saved_properties WHERE user_id = @userId AND property_id = @propertyId",
+            new { userId, propertyId }
         );
-        return result != null;
+        return count > 0;
     }
 }
