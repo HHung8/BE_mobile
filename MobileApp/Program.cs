@@ -48,6 +48,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPropertyService, PropertyService>();
 builder.Services.AddScoped<ISavedPropertyService, SavedPropertyService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // 2. Cấu hình jwt authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -96,6 +97,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
